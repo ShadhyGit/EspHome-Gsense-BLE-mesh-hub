@@ -349,11 +349,12 @@ void MeshDevice::handle_packet(std::string &packet) {
 
     if (!device->send_discovery)
     {
+      ESP_LOGD(TAG, "Sending discovery!");
       Device *device = this->get_device(mesh_id);
-      device->mac = "A4:C1:38:90:49:8A"
+      device->mac = "A4:C1:38:90:49:8A";
       //  Hardcoding to product_id: 0x32 (50 in DEC)
       device->device_info = this->device_info_resolver->get_by_product_id(50);
-      this->send_discovery(device)
+      this->send_discovery(device);
     }
 
     ESP_LOGD(TAG,
