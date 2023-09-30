@@ -728,8 +728,9 @@ Packet counter runs between 1 and 0xffff.
   packet[5] = dest & 0xff;
   packet[6] = (dest >> 8) & 0xff;
   packet[7] = command & 0xff;
-  packet[8] = this->vendor & 0xff;
-  packet[9] = (this->vendor >> 8) & 0xff;
+  // 0x0211 = vendor
+  packet[8] = 0x0211 & 0xff;
+  packet[9] = (0x0211 >> 8) & 0xff;
   for (int i = 0; i < data.size(); i++)
     packet[i + 10] = data[i];
 
