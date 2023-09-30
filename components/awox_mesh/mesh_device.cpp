@@ -347,6 +347,15 @@ void MeshDevice::handle_packet(std::string &packet) {
     G = packet[17];
     B = packet[18];
 
+    if (!device->send_discovery)
+    {
+      Device *device = this->get_device(mesh_id);
+      device->mac = "A4:C1:38:90:49:8A"
+      //  Hardcoding to product_id: 0x32 (50 in DEC)
+      device->device_info = this->device_info_resolver->get_by_product_id(50);
+      this->send_discovery(device)
+    }
+
     ESP_LOGD(TAG,
              "online status report: mesh: %d, on: %d, color_mode: %d, transition_mode: %d, w_b: %d, temp: %d, "
              "c_b: %d, rgb: %02X%02X%02X ",
