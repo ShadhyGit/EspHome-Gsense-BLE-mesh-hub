@@ -124,7 +124,8 @@ class DeviceInfoResolver {
       return device_info[product_id];
     }
 
-    return this->create_device_info(DEVICE_TYPE_DIM, product_id, "Unknown device type", "", "AwoX", "mdi:lightbulb-help-outline");
+    // Should be the default light
+    return this->create_device_info(DEVICE_TYPE_TW, product_id, "Gsense Light", "", "Gsense", "mdi:lightbulb");
   }
 
   void register_device(int device_type, int product_id, const char *name, const char *model, const char *manufacturer,
