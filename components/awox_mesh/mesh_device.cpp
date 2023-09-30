@@ -461,7 +461,7 @@ std::string MeshDevice::device_state_as_string(Device *device) {
 
 std::string MeshDevice::get_discovery_topic_(const MQTTDiscoveryInfo &discovery_info, Device *device) const {
   return discovery_info.prefix + "/" + device->device_info->get_component_type() + "/awox-" +
-         str_sanitize(device->mac) + "/config";
+         std::to_string(device->mesh_id) + "/config";
 }
 
 std::string MeshDevice::get_mqtt_topic_for_(Device *device, const std::string &suffix) const {
@@ -540,7 +540,8 @@ void MeshDevice::send_discovery(Device *device) {
         root["schema"] = "json";
 
         // Entity
-        root[MQTT_NAME] = nullptr;
+        // Light can't be null
+        root[MQTT_NAME] = "Light " + std::to_string(device->mesh_id);
         root[MQTT_UNIQUE_ID] = "awox-" + device->mac + "-" + device->device_info->get_component_type();
 
         if (strlen(device->device_info->get_icon()) > 0) {
@@ -598,7 +599,7 @@ void MeshDevice::send_discovery(Device *device) {
 
         JsonArray identifiers = device_info.createNestedArray(MQTT_DEVICE_IDENTIFIERS);
         identifiers.add("esp-awox-mesh-" + std::to_string(device->mesh_id));
-        identifiers.add(device->mac);
+        // identifiers.add(device->mac);
 
         device_info[MQTT_DEVICE_NAME] = device->device_info->get_name();
 
