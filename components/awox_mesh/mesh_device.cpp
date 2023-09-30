@@ -347,6 +347,7 @@ void MeshDevice::handle_packet(std::string &packet) {
     G = packet[17];
     B = packet[18];
 
+    ESP_LOGD(TAG, "Checking if discovered");
     if (!device->send_discovery)
     {
       ESP_LOGD(TAG, "Sending discovery!");
