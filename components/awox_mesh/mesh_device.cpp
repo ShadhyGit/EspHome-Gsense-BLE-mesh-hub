@@ -542,7 +542,8 @@ void MeshDevice::send_discovery(Device *device) {
         // Entity
         // Light can't be null
         root[MQTT_NAME] = "Light " + std::to_string(device->mesh_id);
-        root[MQTT_UNIQUE_ID] = "awox-" + device->mac + "-" + device->device_info->get_component_type();
+        // Use mesh id instead of mac for now
+        root[MQTT_UNIQUE_ID] = "awox-" + std::to_string(device->mesh_id) + "-" + device->device_info->get_component_type();
 
         if (strlen(device->device_info->get_icon()) > 0) {
           root[MQTT_ICON] = device->device_info->get_icon();
