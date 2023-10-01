@@ -846,7 +846,7 @@ bool MeshDevice::set_white_brightness(int dest, int brightness) {
 }
 
 bool MeshDevice::set_white_temperature(int dest, int temp) {
-  this->queue_command(C_WHITE_TEMPERATURE, {static_cast<char>(temp)}, dest);
+  this->queue_command(C_WHITE_TEMPERATURE, {0x05, static_cast<char>(temp)}, dest);
   return true;
 }
 
