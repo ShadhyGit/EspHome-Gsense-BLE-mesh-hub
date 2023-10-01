@@ -335,13 +335,14 @@ void MeshDevice::handle_packet(std::string &packet) {
     mesh_id = (static_cast<unsigned char>(packet[19]) * 256) + static_cast<unsigned char>(packet[10]);
     mode = static_cast<unsigned char>(packet[12]);
     online = packet[11] > 0;
-    state = (mode & 1) == 1;
     color_mode = ((mode >> 1) & 1) == 1;
     transition_mode = ((mode >> 2) & 1) == 1;
 
-    white_brightness = packet[13];
-    temperature = packet[14];
+    white_brightness = packet[12];
+    temperature = packet[13];
     color_brightness = packet[15];
+    // If brightness == 0, then state is off
+    state = (white_brightness & 1) == 1;
 
     R = packet[16];
     G = packet[17];
