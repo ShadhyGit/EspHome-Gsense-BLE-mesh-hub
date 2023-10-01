@@ -335,7 +335,9 @@ void MeshDevice::handle_packet(std::string &packet) {
     mesh_id = (static_cast<unsigned char>(packet[19]) * 256) + static_cast<unsigned char>(packet[10]);
     mode = static_cast<unsigned char>(packet[12]);
     online = packet[11] > 0;
-    color_mode = ((mode >> 1) & 1) == 1;
+    // color_mode = ((mode >> 1) & 1) == 1;
+    // Lights don't support colour mode, this isn't the right way to check anyway
+    color_mode = 0;
     transition_mode = ((mode >> 2) & 1) == 1;
 
     white_brightness = packet[12];
@@ -718,6 +720,20 @@ void MeshDevice::process_incomming_command(Device *device, JsonObject root) {
       case PARSE_NONE:
         break;
     }
+  }
+
+  if (root.containsKey("setup_group")) {
+    ESP_LOGD(TAG, "Processing groups");
+    Device *device = this->get_device((int) root["setup_group"]);
+    if (!device->send_discovery)
+    {
+      ESP_LOGD(TAG, "Sending discovery!");
+      device->mac = "A4:C1:38:90:49:8A";
+      //  Hardcoding to product_id: 0x32 (50 in DEC)
+      device->device_info = this->device_info_resolver->get_by_product_id(50);
+      this->send_discovery(device);
+    }
+
   }
 
   this->publish_state(device);
