@@ -253,6 +253,9 @@ class MeshDevice : public esp32_ble_client::BLEClientBase {
   bool request_device_info(Device *device);
 
   bool request_device_version(int dest);
+
+  bool request_device_group(int dest);
+  
 };
 
 }  // namespace awox_mesh
