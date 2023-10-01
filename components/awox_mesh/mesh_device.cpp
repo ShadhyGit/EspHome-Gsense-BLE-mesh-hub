@@ -403,6 +403,22 @@ void MeshDevice::handle_packet(std::string &packet) {
     this->send_discovery(device);
     return;
 
+  } else if (static_cast<unsigned char>(packet[7]) == COMMAND_GROUP_INFO_RESP) {
+    mesh_id = (static_cast<unsigned char>(packet[10]) | 0x8000);
+
+    Device *device = this->get_device(mesh_id);
+    ESP_LOGD(TAG, "Checking if discovered");
+    if (!device->send_discovery)
+    {
+      ESP_LOGD(TAG, "Sending discovery!");
+      device->mac = "A4:C1:38:90:49:8A";
+      //  Hardcoding to product_id: 0x32 (50 in DEC)
+      device->device_info = this->device_info_resolver->get_by_product_id(50);
+      this->send_discovery(device);
+    }
+
+    ESP_LOGD(TAG, "group info report: mesh: %d", mesh_id);
+
   } else {
     // ESP_LOGW(TAG, "Unknown report, dev [%d]: command %02X => %s", mesh_id, static_cast<unsigned char>(packet[7]),
             //  TextToBinaryString(packet).c_str());
@@ -820,6 +836,7 @@ Device *MeshDevice::get_device(int mesh_id) {
   ESP_LOGI(TAG, "Added mesh_id: %d, Number of found mesh devices = %d", device->mesh_id, this->devices_.size());
 
   this->request_device_info(device);
+  this->request_device_group(mesh_id);
   // this->request_device_version(device->mesh_id);
 
   return device;
@@ -858,6 +875,11 @@ bool MeshDevice::request_device_info(Device *device) {
 
 bool MeshDevice::request_device_version(int dest) {
   this->queue_command(COMMAND_DEVICE_INFO_QUERY, {0x10, 0x02}, dest);
+  return true;
+}
+
+bool MeshDevice::request_device_group(int dest) {
+  this->queue_command(COMMAND_GROUP_INFO, {0x10, 0x01}, dest);
   return true;
 }
 

@@ -38,6 +38,8 @@ static std::string uuid_pair_char = "00010203-0405-0607-0809-0a0b0c0d1914";
 #define COMMAND_ADDRESS_REPORT 0xE1
 #define COMMAND_DEVICE_INFO_QUERY 0xEA
 #define COMMAND_DEVICE_INFO_REPORT 0xEB
+#define COMMAND_GROUP_INFO 0xDD
+#define COMMAND_GROUP_INFO_RESP 0xD4
 
 static std::string TextToBinaryString(std::string words) {
   std::string binaryString = "";
