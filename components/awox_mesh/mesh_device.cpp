@@ -342,7 +342,8 @@ void MeshDevice::handle_packet(std::string &packet) {
     temperature = packet[13];
     color_brightness = packet[15];
     // If brightness == 0, then state is off
-    state = (white_brightness & 1) == 1;
+    // state = (white_brightness & 1) == 1;
+    state = transition_mode;
 
     R = packet[16];
     G = packet[17];
@@ -401,8 +402,8 @@ void MeshDevice::handle_packet(std::string &packet) {
     return;
 
   } else {
-    ESP_LOGW(TAG, "Unknown report, dev [%d]: command %02X => %s", mesh_id, static_cast<unsigned char>(packet[7]),
-             TextToBinaryString(packet).c_str());
+    // ESP_LOGW(TAG, "Unknown report, dev [%d]: command %02X => %s", mesh_id, static_cast<unsigned char>(packet[7]),
+            //  TextToBinaryString(packet).c_str());
 
     return;
   }
@@ -505,13 +506,13 @@ void MeshDevice::publish_state(Device *device) {
 
           root["color_mode"] = "color_temp";
 
-          root["brightness"] = convert_value_to_available_range(device->white_brightness, 1, 0x7f, 0, 255);
+          root["brightness"] = convert_value_to_available_range(device->white_brightness, 0, 100, 0, 255);
 
           if (device->color_mode) {
             root["color_mode"] = "rgb";
             root["brightness"] = convert_value_to_available_range(device->color_brightness, 0xa, 0x64, 0, 255);
           } else {
-            root["color_temp"] = convert_value_to_available_range(device->temperature, 0, 0x7f, 153, 370);
+            root["color_temp"] = convert_value_to_available_range(device->temperature, 0, 100, 153, 370);
           }
           JsonObject color = root.createNestedObject("color");
           color["r"] = device->R;
@@ -675,7 +676,7 @@ void MeshDevice::process_incomming_command(Device *device, JsonObject root) {
     this->set_color_brightness(device->mesh_id, brightness);
 
   } else if (root.containsKey("brightness")) {
-    int brightness = convert_value_to_available_range((int) root["brightness"], 0, 255, 1, 0x7f);
+    int brightness = convert_value_to_available_range((int) root["brightness"], 0, 255, 1, 100);
 
     state_set = true;
     device->state = true;
@@ -686,7 +687,7 @@ void MeshDevice::process_incomming_command(Device *device, JsonObject root) {
   }
 
   if (root.containsKey("color_temp")) {
-    int temperature = convert_value_to_available_range((int) root["color_temp"], 153, 370, 0, 0x7f);
+    int temperature = convert_value_to_available_range((int) root["color_temp"], 153, 370, 0, 100);
 
     state_set = true;
     device->state = true;
