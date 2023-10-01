@@ -405,6 +405,19 @@ void MeshDevice::handle_packet(std::string &packet) {
 
   } else if (static_cast<unsigned char>(packet[7]) == COMMAND_GROUP_INFO_RESP) {
     mesh_id = (static_cast<unsigned char>(packet[10]) | 0x8000);
+    mode = static_cast<unsigned char>(packet[12]);
+    online = 1;
+    // All fake info...
+    state =  1;
+    color_mode = 0;
+    transition_mode = 0;
+
+    white_brightness = 100;
+    temperature = 100;
+    color_brightness = 0;
+    R = 0;
+    G = 0;
+    B = 0;
 
     Device *device = this->get_device(mesh_id);
     ESP_LOGD(TAG, "Checking if discovered");
