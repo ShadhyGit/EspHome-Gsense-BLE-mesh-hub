@@ -47,7 +47,7 @@ void AwoxMeshMqtt::setup() {
 
 std::string AwoxMeshMqtt::get_discovery_topic_(const MQTTDiscoveryInfo &discovery_info, Device *device) const {
   return discovery_info.prefix + "/" + device->device_info->get_component_type() + "/awox-" +
-         device->address_str_hex_only() + "/config";
+         std::to_string(device->mesh_id) + "/config";
 }
 
 std::string AwoxMeshMqtt::get_mqtt_topic_for_(MeshDestination *mesh_destination, const std::string &suffix) const {
@@ -157,11 +157,11 @@ void AwoxMeshMqtt::publish_state(MeshDestination *mesh_destination) {
           } else {
             if (mesh_destination->device_info->has_feature(FEATURE_WHITE_TEMPERATURE)) {
               root["color_mode"] = "color_temp";
-              root["color_temp"] = convert_value_to_available_range(mesh_destination->temperature, 0, 0x7f, 153, 370);
+              root["color_temp"] = convert_value_to_available_range(mesh_destination->temperature, 0, 100, 153, 370);
             } else {
               root["color_mode"] = "brightness";
             }
-            root["brightness"] = convert_value_to_available_range(mesh_destination->white_brightness, 1, 0x7f, 0, 255);
+            root["brightness"] = convert_value_to_available_range(mesh_destination->white_brightness, 1, 100, 0, 255);
           }
 
           if (mesh_destination->candle_mode) {
@@ -326,8 +326,8 @@ void AwoxMeshMqtt::send_discovery(Device *device) {
         root["schema"] = "json";
 
         // Entity
-        root[MQTT_NAME] = nullptr;
-        root[MQTT_UNIQUE_ID] = "awox-" + device->address_str() + "-" + device->device_info->get_component_type();
+        root[MQTT_NAME] = "Light " + std::to_string(device->mesh_id);
+        root[MQTT_UNIQUE_ID] = "gsense-" + std::to_string(device->mesh_id) + "-" + device->device_info->get_component_type();
 
         if (strlen(device->device_info->get_icon()) > 0) {
           root[MQTT_ICON] = device->device_info->get_icon();
@@ -387,8 +387,8 @@ void AwoxMeshMqtt::send_discovery(Device *device) {
         JsonObject device_info = root.createNestedObject(MQTT_DEVICE);
 
         JsonArray identifiers = device_info.createNestedArray(MQTT_DEVICE_IDENTIFIERS);
-        identifiers.add("esp-awox-mesh-" + std::to_string(device->mesh_id));
-        identifiers.add(device->address_str());
+        identifiers.add("esp-gsense-mesh-" + std::to_string(device->mesh_id));
+        // identifiers.add(device->address_str());
 
         device_info[MQTT_DEVICE_NAME] = device->device_info->get_name();
 
@@ -507,10 +507,10 @@ void AwoxMeshMqtt::send_group_discovery(Group *group) {
         JsonObject device_info = root.createNestedObject(MQTT_DEVICE);
 
         JsonArray identifiers = device_info.createNestedArray(MQTT_DEVICE_IDENTIFIERS);
-        identifiers.add("esp-awox-mesh-group-" + std::to_string(group->group_id));
+        identifiers.add("esp-gsense-mesh-group-" + std::to_string(group->group_id));
 
         device_info[MQTT_DEVICE_MODEL] = "Group - " + std::to_string(group->group_id);
-        device_info[MQTT_DEVICE_MANUFACTURER] = "ESPHome AwoX BLE mesh";
+        device_info[MQTT_DEVICE_MANUFACTURER] = "Gsense";
 
         device_info[MQTT_DEVICE_NAME] = "Group " + std::to_string(group->group_id);
 
@@ -572,7 +572,7 @@ void AwoxMeshMqtt::process_incomming_command(MeshDestination *mesh_destination, 
     this->mesh_->set_color_brightness(dest, brightness);
 
   } else if (root.containsKey("brightness")) {
-    int brightness = convert_value_to_available_range((int) root["brightness"], 0, 255, 1, 0x7f);
+    int brightness = convert_value_to_available_range((int) root["brightness"], 0, 255, 1, 100);
 
     state_set = true;
     mesh_destination->state = true;
@@ -583,7 +583,7 @@ void AwoxMeshMqtt::process_incomming_command(MeshDestination *mesh_destination, 
   }
 
   if (root.containsKey("color_temp")) {
-    int temperature = convert_value_to_available_range((int) root["color_temp"], 153, 370, 0, 0x7f);
+    int temperature = convert_value_to_available_range((int) root["color_temp"], 153, 370, 0, 100);
 
     state_set = true;
     mesh_destination->state = true;

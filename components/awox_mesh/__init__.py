@@ -55,17 +55,21 @@ CONFIG_SCHEMA = cv.All(
             cv.GenerateID(): cv.declare_id(Awox),
             cv.Required(CONF_MESH_NAME): cv.All(
                 cv.string_strict,
-                cv.Length(max=8),
+                cv.Length(max=12),
             ),
             cv.Required(CONF_MESH_PASSWORD): cv.All(
                 cv.string_strict,
                 cv.Length(max=8),
             ),
             cv.Optional(CONF_ADDRESS_PREFIX): cv.string_strict,
-            cv.Optional(CONF_MAX_CONNECTIONS, default=2): cv.int_range(min=1, max=MAX_CONNECTIONS),
+            cv.Optional(CONF_MAX_CONNECTIONS, default=2): cv.int_range(
+                min=1, max=MAX_CONNECTIONS
+            ),
             cv.Optional(CONF_MIN_RSSI): cv.int_range(min=-100, max=-10),
             cv.Optional(CONF_ALLOWED_MESH_IDS, default=[]): cv.ensure_list(cv.int_),
-            cv.Optional(CONF_ALLOWED_ADDRESSES, default=[]): cv.ensure_list(cv.mac_address),
+            cv.Optional(CONF_ALLOWED_ADDRESSES, default=[]): cv.ensure_list(
+                cv.mac_address
+            ),
             cv.Optional(CONF_DEVICE_INFO, default=[]): cv.ensure_list(
                 cv.Schema(
                     {
@@ -125,4 +129,3 @@ async def to_code(config):
         await cg.register_component(connection_var, connection_conf)
         cg.add(var.register_connection(connection_var))
         await esp32_ble_tracker.register_client(connection_var, connection_conf)
-

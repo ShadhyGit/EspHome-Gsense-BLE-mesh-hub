@@ -363,18 +363,29 @@ void MeshConnection::handle_packet(std::string &packet) {
     mode = static_cast<unsigned char>(packet[12]);
 
     online = packet[11] > 0;
-    state = (mode & 1) == 1;
-    color_mode = ((mode >> 1) & 1) == 1;
+    color_mode = 0;
     sequence_mode = ((mode >> 2) & 1) == 1;
     candle_mode = ((mode >> 4) & 1) == 1;
-
-    white_brightness = packet[13];
-    temperature = packet[14];
+    
+    white_brightness = packet[12];
+    state = white_brightness > 0;
+    temperature = packet[13];
     color_brightness = packet[15];
+    // state = sequence_mode;
 
     R = packet[16];
     G = packet[17];
     B = packet[18];
+
+    Device *device = this->mesh_->get_device(mesh_id);
+    if (!device->send_discovery)
+    {
+      ESP_LOGD(TAG, "Sending discovery for device %u", mesh_id);
+      device->set_address(0x38, 0x8A, 0x4F, 0x97);
+      //  Hardcoding to product_id: 0x32 (50 in DEC)
+      device->product_id = 50;
+      this->mesh_->send_discovery(device);
+    }
 
     ESP_LOGD(TAG,
              "online status report: mesh: %d, on: %d, color_mode: %d, sequence_mode: %d, candle_mode: %d, w_b: %d, "
@@ -384,28 +395,30 @@ void MeshConnection::handle_packet(std::string &packet) {
              G, B, mode, std::bitset<8>(mode).to_string().c_str());
 
   } else if (static_cast<unsigned char>(packet[7]) == COMMAND_STATUS_REPORT) {  // DB
-    mode = static_cast<unsigned char>(packet[10]);
-    mesh_id = (static_cast<unsigned char>(packet[4]) * 256) + static_cast<unsigned char>(packet[3]);
+    // Not the right data.. Commenting it out
+    
+    // mode = static_cast<unsigned char>(packet[10]);
+    // mesh_id = (static_cast<unsigned char>(packet[4]) * 256) + static_cast<unsigned char>(packet[3]);
 
-    online = true;
-    state = (mode & 1) == 1;
-    color_mode = ((mode >> 1) & 1) == 1;
-    sequence_mode = ((mode >> 2) & 1) == 1;
-    candle_mode = ((mode >> 4) & 1) == 1;
+    // online = true;
+    // state = (mode & 1) == 1;
+    // color_mode = 0;
+    // sequence_mode = ((mode >> 2) & 1) == 1;
+    // candle_mode = ((mode >> 4) & 1) == 1;
 
-    white_brightness = packet[11];
-    temperature = packet[12];
-    color_brightness = packet[13];
+    // white_brightness = packet[12];
+    // temperature = packet[13];
+    // color_brightness = packet[15];
 
-    R = packet[14];
-    G = packet[15];
-    B = packet[16];
+    // R = packet[16];
+    // G = packet[17];
+    // B = packet[18];
 
-    ESP_LOGD(TAG,
-             "status report: mesh: %d, on: %d, color_mode: %d, sequence_mode: %d, candle_mode: %d, w_b: %d, temp: %d, "
-             "c_b: %d, rgb: %02X%02X%02X, mode: %d %s",
-             mesh_id, state, color_mode, sequence_mode, candle_mode, white_brightness, temperature, color_brightness, R,
-             G, B, mode, std::bitset<8>(mode).to_string().c_str());
+    // ESP_LOGD(TAG,
+    //          "status report: mesh: %d, on: %d, color_mode: %d, sequence_mode: %d, candle_mode: %d, w_b: %d, temp: %d, "
+    //          "c_b: %d, rgb: %02X%02X%02X, mode: %d %s",
+    //          mesh_id, state, color_mode, sequence_mode, candle_mode, white_brightness, temperature, color_brightness, R,
+    //          G, B, mode, std::bitset<8>(mode).to_string().c_str());
 
   } else if (static_cast<unsigned char>(packet[7]) == COMMAND_ADDRESS_REPORT && !packet[10]) {
     mesh_id = (static_cast<unsigned char>(packet[4]) * 256) + static_cast<unsigned char>(packet[3]);
@@ -541,8 +554,8 @@ Packet counter runs between 1 and 0xffff.
   packet[5] = dest & 0xff;
   packet[6] = (dest >> 8) & 0xff;
   packet[7] = command & 0xff;
-  packet[8] = 0x60;  // this->vendor & 0xff;
-  packet[9] = 0x01;  //(this->vendor >> 8) & 0xff;
+  packet[8] = 0x0211;  // this->vendor & 0xff;
+  packet[9] = (0x0211 >> 8) & 0xff;  //(this->vendor >> 8) & 0xff;
   for (int i = 0; i < data.size(); i++)
     packet[i + 10] = data[i];
 
@@ -597,7 +610,7 @@ void MeshConnection::set_white_brightness(int dest, int brightness) {
 }
 
 void MeshConnection::set_white_temperature(int dest, int temp) {
-  this->queue_command(C_WHITE_TEMPERATURE, {static_cast<char>(temp)}, dest);
+  this->queue_command(C_WHITE_TEMPERATURE, {0x05, static_cast<char>(temp)}, dest);
 }
 
 void MeshConnection::set_sequence(int dest, int sequence) {
