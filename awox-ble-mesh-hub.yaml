@@ -1,10 +1,10 @@
 esphome:
-  name: awox-ble-mesh-hub
-  friendly_name: "AwoX BLE mesh hub"
+  name: gsense-hub
+  friendly_name: gsense_hub
 
 esp32:
   # Match this with the board your using
-  board: nodemcu-32s
+  board: esp32dev
   framework:
     # Be sure to "Clean Build Files" when switching framework
     type: esp-idf
@@ -38,36 +38,35 @@ mqtt:
   password: !secret mqtt_password
 
   # Disable retained discovery messages until you are got the config correct
-  discovery_retain: False
+  discovery_retain: True
 
 # Disable Home Assistant API to prevent frequent MQTT disconnections
 #api:
 
 ota:
   - platform: esphome
-    password: !secret ota_password
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
 
 external_components:
-  - source:
-      type: git
-      url: https://github.com/fsaris/EspHome-AwoX-BLE-mesh-hub
-      ref: main
-  #  ref: dev
   # - source:
-  #     type: local
-  #     path: components
+  #     type: git
+  #     url: https://github.com/fsaris/EspHome-AwoX-BLE-mesh-hub
+  #     ref: main
+  #  ref: dev
+  - source:
+      type: local
+      path: components
 
 esp32_ble_tracker:
   scan_parameters:
     active: false
 
 awox_mesh:
-  mesh_name: !secret mesh_name
-  mesh_password: !secret mesh_password
+  mesh_name: "Gsense_Mesh"
+  mesh_password: "123"
 
   # Optional options
 
@@ -92,8 +91,8 @@ awox_mesh:
   device_info:
     # Example device type, see device info in HomeAssistant or MQTT message to find the 'product_id'
     - product_id: 0x32
-      device_type: RGB
-      manufacturer: EGLO
-      name: Spot 120
-      model: EGLOSpot 120/w
-      icon: mdi:wall-sconce-flat
+      device_type: WHITE_TEMP
+      manufacturer: Gsense
+      name: LED
+      model: GsenseLED
+      icon: mdi:light-recessed
