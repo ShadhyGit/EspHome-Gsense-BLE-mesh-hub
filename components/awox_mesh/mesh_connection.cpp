@@ -362,7 +362,8 @@ void MeshConnection::handle_packet(std::string &packet) {
     mesh_id = (static_cast<unsigned char>(packet[19]) * 256) + static_cast<unsigned char>(packet[10]);
     mode = static_cast<unsigned char>(packet[12]);
 
-    online = packet[11] > 0;
+    // Always mark device as online
+    online = true;
     color_mode = 0;
     sequence_mode = ((mode >> 2) & 1) == 1;
     candle_mode = ((mode >> 4) & 1) == 1;
